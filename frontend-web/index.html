@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Football Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .nav-tab {
+            padding: 12px 24px;
+            border: none;
+            background: white;
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .nav-tab.active {
+            background: #764ba2;
+            color: white;
+        }
+        .competition-selector {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .match-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        .teams {
+            flex: 1;
+        }
+        .teams h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .teams p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .predict-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .predict-btn:hover {
+            transform: scale(1.05);
+        }
+        .prediction-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .prediction-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .prediction-content h2 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .winner {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .winner h3 {
+            color: #2e7d32;
+            font-size: 1.8em;
+        }
+        .probability {
+            margin: 15px 0;
+        }
+        .prob-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .prob-bar {
+            height: 20px;
+            border-radius: 10px;
+            background: #e0e0e0;
+            overflow: hidden;
+        }
+        .prob-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        .home { background: #4caf50; }
+        .draw { background: #ff9800; }
+        .away { background: #f44336; }
+        .close-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #607d8b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+        .no-matches {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 30px 20px;
+            margin-top: 40px;
+        }
+        .footer a {
+            color: white;
+            text-decoration: underline;
+            font-weight: bold;
+            transition: opacity 0.3s;
+        }
+        .footer a:hover {
+            opacity: 0.8;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            header p {
+                font-size: 0.95em;
+            }
+            
+            .nav-tabs {
+                gap: 8px;
+            }
+            
+            .nav-tab {
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+            
+            .match-card {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .teams {
+                width: 100%;
+            }
+            
+            .predict-btn {
+                width: 100%;
+            }
+            
+            table {
+                font-size: 0.85em;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tab {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ AI Football Predictor</h1>
+            <p style="color: white; font-size: 1.1em; margin-bottom: 10px;">Powered by <a href="https://t.me/getitfreeadmin" target="_blank" rel="noopener noreferrer" style="color: white; text-decoration: underline; font-weight: bold;">@getitfreeadmin on Telegram</a></p>
+            <p>Live & upcoming matches with AI predictions</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('upcoming')">Upcoming Matches</button>
+            <button class="nav-tab" onclick="showTab('live')">Live Matches</button>
+            <button class="nav-tab" onclick="showTab('standings')">Standings</button>
+        </div>
+
+        <div class="competition-selector">
+            <select id="competitionSelect" onchange="loadCompetition()">
+                <option value="">All Competitions</option>
+            </select>
+        </div>
+
+        <div id="content"></div>
+        
+        <footer class="footer">
+            <p>Powered by <a href="https://t.me/getitfreeadmin" target="_blank" rel="noopener noreferrer">@getitfreeadmin on Telegram</a></p>
+        </footer>
+    </div>
+
+    <div class="prediction-modal" id="predictionModal">
+        <div class="prediction-content" id="predictionContent">
+        </div>
+    </div>
+
+    <script>
+        // Use relative path since frontend is served by the backend
+        const API_URL = 'https://evil-radios-retire.loca.lt/api'; 
+        
+        let competitions = [];
+        let currentTab = 'upcoming';
+        let selectedCompetition = '';
+
+        async function loadCompetitions() {
+            const res = await fetch(`${API_URL}/competitions`);
+            const data = await res.json();
+            competitions = data.competitions;
+            
+            const select = document.getElementById('competitionSelect');
+            select.innerHTML = '<option value="">All Competitions</option>';
+            
+            competitions.forEach(comp => {
+                select.innerHTML += `<option value="${comp.id}">${comp.name}</option>`;
+            });
+            
+            loadMatches();
+        }
+
+        function showTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'standings') {
+                loadStandings();
+            } else {
+                loadMatches();
+            }
+        }
+
+        async function loadCompetition() {
+            selectedCompetition = document.getElementById('competitionSelect').value;
+            if (currentTab === 'standings') {
+                loadStandings();
+            } else {
+                loadMatches();
+            }
+        }
+
+        async function loadMatches() {
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="card loading">Loading matches...</div>';
+            
+            try {
+                let url = currentTab === 'live' ? `${API_URL}/live-matches` : `${API_URL}/upcoming-matches`;
+                if (selectedCompetition) {
+                    url += `?competition_id=${selectedCompetition}`;
+                }
+                
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (!data.matches || data.matches.length === 0) {
+                    content.innerHTML = '<div class="card no-matches">No matches found at the moment</div>';
+                    return;
+                }
+                
+                let html = '';
+                data.matches.forEach(match => {
+                    const date = match.utcDate ? new Date(match.utcDate).toLocaleString() : 'Date TBD';
+                    const compName = match.competition ? match.competition.name : '';
+                    const compId = match.competition ? match.competition.id : '';
+                    
+                    html += `
+                    <div class="card">
+                        <div class="match-card">
+                            <div class="teams">
+                                <h3>${match.homeTeam.name} vs ${match.awayTeam.name}</h3>
+                                <p>${compName} - ${date}</p>
+                            </div>
+                            <button class="predict-btn" onclick="predictMatch(${match.id}, '${encodeURIComponent(match.homeTeam.name)}', '${encodeURIComponent(match.awayTeam.name)}', ${compId})">Predict</button>
+                        </div>
+                    </div>
+                    `;
+                });
+                
+                content.innerHTML = html;
+                
+            } catch (e) {
+                content.innerHTML = '<div class="card no-matches">Error loading matches</div>';
+            }
+        }
+
+        async function loadStandings() {
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="card loading">Loading standings...</div>';
+            
+            if (!selectedCompetition) {
+                content.innerHTML = '<div class="card no-matches">Please select a competition to view standings</div>';
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_URL}/standings/${selectedCompetition}`);
+                const data = await res.json();
+                
+                if (!data.standings || data.standings.length === 0) {
+                    content.innerHTML = '<div class="card no-matches">No standings data available</div>';
+                    return;
+                }
+                
+                let html = '';
+                data.standings.forEach(standing => {
+                    html += `
+                    <div class="card">
+                        <h3 style="margin-bottom:15px;">${standing.type} - ${standing.group || 'Overall'}</h3>
+                        <table>
+                            <tr>
+                                <th>#</th>
+                                <th>Team</th>
+                                <th>P</th>
+                                <th>GD</th>
+                                <th>Pts</th>
+                            </tr>
+                    `;
+                    
+                    standing.table.forEach(row => {
+                        html += `
+                        <tr>
+                            <td>${row.position}</td>
+                            <td>${row.team.name}</td>
+                            <td>${row.playedGames}</td>
+                            <td style="color: ${row.goalDifference >= 0 ? '#4caf50' : '#f44336'}">${row.goalDifference >= 0 ? '+' : ''}${row.goalDifference}</td>
+                            <td style="font-weight:bold">${row.points}</td>
+                        </tr>
+                        `;
+                    });
+                    
+                    html += '</table></div>';
+                });
+                
+                content.innerHTML = html;
+                
+            } catch (e) {
+                content.innerHTML = '<div class="card no-matches">Error loading standings</div>';
+            }
+        }
+
+        async function predictMatch(matchId, homeTeam, awayTeam, competitionId) {
+            const modal = document.getElementById('predictionModal');
+            const content = document.getElementById('predictionContent');
+            content.innerHTML = '<p>Loading prediction...</p>';
+            modal.style.display = 'flex';
+            
+            try {
+                const res = await fetch(`${API_URL}/predict/${matchId}?homeTeam=${homeTeam}&awayTeam=${awayTeam}&competitionId=${competitionId}`);
+                const pred = await res.json();
+                
+                content.innerHTML = `
+                    <h2>${pred.home_team} vs ${pred.away_team}</h2>
+                    <div class="winner">
+                        <h3>Predicted Winner</h3>
+                        <h3 style="font-size:2em;margin-top:10px;">${pred.predicted_winner}</h3>
+                    </div>
+                    <div class="probability">
+                        <div class="prob-label">
+                            <span>${pred.home_team} Win</span>
+                            <span>${(pred.home_win_prob * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="prob-bar">
+                            <div class="prob-fill home" style="width:${pred.home_win_prob * 100}%"></div>
+                        </div>
+                    </div>
+                    <div class="probability">
+                        <div class="prob-label">
+                            <span>Draw</span>
+                            <span>${(pred.draw_prob * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="prob-bar">
+                            <div class="prob-fill draw" style="width:${pred.draw_prob * 100}%"></div>
+                        </div>
+                    </div>
+                    <div class="probability">
+                        <div class="prob-label">
+                            <span>${pred.away_team} Win</span>
+                            <span>${(pred.away_win_prob * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="prob-bar">
+                            <div class="prob-fill away" style="width:${pred.away_win_prob * 100}%"></div>
+                        </div>
+                    </div>
+                    <button class="close-btn" onclick="closeModal()">Close</button>
+                `;
+                
+            } catch (e) {
+                content.innerHTML = '<p>Error loading prediction</p><button class="close-btn" onclick="closeModal()">Close</button>';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('predictionModal').style.display = 'none';
+        }
+
+        loadCompetitions();
+    </script>
+</body>
+</html>

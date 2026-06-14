@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ai-football-prediction-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    plan: free
+    envVars:
+      - key: FOOTBALL_DATA_API_KEY
+        sync: false
+    repo: https://github.com/your-username/your-repo  # Replace with your repo if you push to GitHub
+    branch: main

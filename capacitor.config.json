@@ -1,0 +1,14 @@
+{
+  "appId": "com.getitfree.footballprediction",
+  "appName": "AI Football Predictor",
+  "webDir": "frontend-web",
+  "server": {
+    "androidScheme": "https",
+    "url": "https://loose-points-peel.loca.lt"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
