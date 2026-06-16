@@ -314,7 +314,12 @@
 
     <script>
         // Use relative path since frontend is served by the backend
-        const API_URL = 'https://evil-radios-retire.loca.lt/api'; 
+        // Auto-detect whether we're on localhost or public
+        let API_URL = '/api'; // Default to relative for local
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            // If not local, use the tunnel URL
+            API_URL = 'https://social-rooms-eat.loca.lt/api';
+        } 
         
         let competitions = [];
         let currentTab = 'upcoming';
