@@ -8,5 +8,5 @@ services:
     envVars:
       - key: FOOTBALL_DATA_API_KEY
         sync: false
-    repo: https://github.com/your-username/your-repo  # Replace with your repo if you push to GitHub
+    repo: https://github.com/emmygolden779-coder/ai-football-prediction
     branch: main
